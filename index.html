@@ -170,8 +170,14 @@
             transform: scale(0.95);
         }
 
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         #startBtn {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
 
         .modal {
@@ -302,22 +308,29 @@
         const bgMusic = document.getElementById('bgMusic');
         bgMusic.volume = 0.3;
 
-        const clearSound = new AudioContext();
+        let clearSound = null;
         function playClearSound() {
-            const osc = clearSound.createOscillator();
-            const gain = clearSound.createGain();
-            
-            osc.connect(gain);
-            gain.connect(clearSound.destination);
-            
-            osc.frequency.setValueAtTime(200, clearSound.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, clearSound.currentTime + 0.1);
-            
-            gain.gain.setValueAtTime(0.3, clearSound.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, clearSound.currentTime + 0.15);
-            
-            osc.start(clearSound.currentTime);
-            osc.stop(clearSound.currentTime + 0.15);
+            try {
+                if (!clearSound) {
+                    clearSound = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = clearSound.createOscillator();
+                const gain = clearSound.createGain();
+                
+                osc.connect(gain);
+                gain.connect(clearSound.destination);
+                
+                osc.frequency.setValueAtTime(200, clearSound.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, clearSound.currentTime + 0.1);
+                
+                gain.gain.setValueAtTime(0.3, clearSound.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, clearSound.currentTime + 0.15);
+                
+                osc.start(clearSound.currentTime);
+                osc.stop(clearSound.currentTime + 0.15);
+            } catch (e) {
+                console.log('Sound not available');
+            }
         }
 
         const SHAPES = [
@@ -477,7 +490,12 @@
         function gameOver() {
             gameRunning = false;
             clearInterval(gameLoop);
-            bgMusic.pause();
+            try {
+                bgMusic.pause();
+            } catch (e) {}
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLevel').textContent = level;
             document.getElementById('gameOverModal').style.display = 'flex';
@@ -520,8 +538,17 @@
             currentPiece = new Piece();
             lastDropTime = performance.now();
             updateStats();
-            bgMusic.currentTime = 0;
-            bgMusic.play();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            
+            try {
+                bgMusic.currentTime = 0;
+                bgMusic.play().catch(e => console.log('Music autoplay blocked'));
+            } catch (e) {
+                console.log('Music not available');
+            }
+            
             document.getElementById('gameOverModal').style.display = 'none';
             requestAnimationFrame(update);
         }
@@ -531,9 +558,13 @@
             gamePaused = !gamePaused;
             document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
             if (gamePaused) {
-                bgMusic.pause();
+                try {
+                    bgMusic.pause();
+                } catch (e) {}
             } else {
-                bgMusic.play();
+                try {
+                    bgMusic.play().catch(e => console.log('Music blocked'));
+                } catch (e) {}
                 lastDropTime = performance.now();
                 requestAnimationFrame(update);
             }
@@ -576,6 +607,8 @@
             }
         });
 
+        document.getElementById('pauseBtn').disabled = true;
+        
         drawBoard();
     </script>
 </body>

@@ -19,65 +19,67 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            overflow: hidden;
-            touch-action: none;
+            padding: 10px 0;
+            overflow-y: auto;
+            touch-action: pan-y;
         }
 
         .container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 500px;
             width: 95%;
+            margin: 0 auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         h1 {
             color: #667eea;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2em;
+            margin-bottom: 5px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
         .stat-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .stat-label {
-            font-size: 0.8em;
+            font-size: 0.75em;
             opacity: 0.9;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .stat-value {
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
         }
 
         .game-area {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
         #gameCanvas {
@@ -90,18 +92,18 @@
         .controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
             max-width: 300px;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
         .control-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
-            font-size: 1.2em;
+            font-size: 1.3em;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -238,7 +240,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>ðŸŽ® TETRIS</h1>
+            <h1>Tetris 2.0</h1>
         </div>
 
         <div class="stats">
@@ -261,16 +263,16 @@
         </div>
 
         <div class="controls">
-            <button class="control-btn" id="rotateBtn">âŸ³</button>
-            <button class="control-btn" id="leftBtn">â—„</button>
-            <button class="control-btn" id="downBtn">â–¼</button>
-            <button class="control-btn" id="rightBtn">â–º</button>
-            <button class="control-btn" id="dropBtn">â–¼â–¼</button>
+            <button class="control-btn" id="rotateBtn">&#8635;</button>
+            <button class="control-btn" id="leftBtn">&#9664;</button>
+            <button class="control-btn" id="downBtn">&#9660;</button>
+            <button class="control-btn" id="rightBtn">&#9654;</button>
+            <button class="control-btn" id="dropBtn">&#8595;&#8595;</button>
         </div>
 
         <div class="action-buttons">
-            <button class="action-btn" id="startBtn">â–¶</button>
-            <button class="action-btn" id="pauseBtn">âšâš</button>
+            <button class="action-btn" id="startBtn">&#9658;</button>
+            <button class="action-btn" id="pauseBtn">&#10074;&#10074;</button>
         </div>
     </div>
 
@@ -279,7 +281,7 @@
             <h2>Game Over!</h2>
             <p>Score: <span id="finalScore">0</span></p>
             <p>Level: <span id="finalLevel">1</span></p>
-            <button class="action-btn" id="restartBtn">Neues Spiel</button>
+            <button class="action-btn" id="restartBtn">&#9658; Neu</button>
         </div>
     </div>
 
@@ -316,18 +318,28 @@
                 }
                 const osc = clearSound.createOscillator();
                 const gain = clearSound.createGain();
+                const osc2 = clearSound.createOscillator();
                 
                 osc.connect(gain);
+                osc2.connect(gain);
                 gain.connect(clearSound.destination);
                 
-                osc.frequency.setValueAtTime(200, clearSound.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, clearSound.currentTime + 0.1);
+                osc.type = 'square';
+                osc2.type = 'sawtooth';
                 
-                gain.gain.setValueAtTime(0.3, clearSound.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, clearSound.currentTime + 0.15);
+                osc.frequency.setValueAtTime(300, clearSound.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, clearSound.currentTime + 0.2);
+                
+                osc2.frequency.setValueAtTime(350, clearSound.currentTime);
+                osc2.frequency.exponentialRampToValueAtTime(100, clearSound.currentTime + 0.2);
+                
+                gain.gain.setValueAtTime(0.4, clearSound.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, clearSound.currentTime + 0.25);
                 
                 osc.start(clearSound.currentTime);
-                osc.stop(clearSound.currentTime + 0.15);
+                osc.stop(clearSound.currentTime + 0.25);
+                osc2.start(clearSound.currentTime);
+                osc2.stop(clearSound.currentTime + 0.25);
             } catch (e) {
                 console.log('Sound not available');
             }
@@ -495,7 +507,7 @@
             } catch (e) {}
             document.getElementById('startBtn').disabled = false;
             document.getElementById('pauseBtn').disabled = true;
-            document.getElementById('pauseBtn').textContent = 'Pause';
+            document.getElementById('pauseBtn').innerHTML = '&#10074;&#10074;';
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLevel').textContent = level;
             document.getElementById('gameOverModal').style.display = 'flex';
@@ -556,7 +568,7 @@
         function togglePause() {
             if (!gameRunning) return;
             gamePaused = !gamePaused;
-            document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
+            document.getElementById('pauseBtn').innerHTML = gamePaused ? '&#9658;' : '&#10074;&#10074;';
             if (gamePaused) {
                 try {
                     bgMusic.pause();

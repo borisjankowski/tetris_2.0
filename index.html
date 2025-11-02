@@ -84,8 +84,8 @@
             justify-content: center;
             align-items: center;
             flex: 1 1 auto;
-            padding: 10px 0;
-            min-height: 0;
+            padding: clamp(6px, 2vh, 16px) 0;
+            min-height: clamp(320px, 58dvh, 680px);
         }
 
         #gameCanvas {
@@ -93,9 +93,8 @@
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             background: #1a1a2e;
-            width: 100%;
+            max-width: 100%;
             height: auto;
-            max-height: 100%;
             aspect-ratio: 1 / 2;
         }
 
@@ -103,7 +102,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            max-width: 300px;
+            max-width: clamp(240px, 70%, 320px);
             margin: 0 auto clamp(10px, 3vh, 20px);
         }
 
@@ -111,9 +110,9 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: 18px;
+            padding: clamp(10px, 3.5vw, 16px);
             border-radius: 12px;
-            font-size: 1.3em;
+            font-size: clamp(1em, 4vw, 1.2em);
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -165,9 +164,9 @@
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border: none;
             color: white;
-            padding: 15px 30px;
+            padding: clamp(12px, 3vw, 18px) clamp(22px, 6vw, 32px);
             border-radius: 12px;
-            font-size: 1em;
+            font-size: clamp(0.95em, 3.2vw, 1.05em);
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
@@ -250,18 +249,28 @@
                 font-size: 1.1em;
             }
 
+            .game-area {
+                min-height: clamp(360px, 65dvh, 720px);
+            }
+
             .controls {
                 width: 100%;
                 max-width: none;
+                gap: 6px;
             }
 
             .control-btn {
-                padding: 14px;
-                font-size: 1em;
+                padding: clamp(9px, 3vw, 12px);
+                font-size: 0.95em;
             }
 
             .action-buttons {
                 flex-wrap: wrap;
+            }
+
+            .action-btn {
+                padding: 10px 20px;
+                font-size: 0.95em;
             }
         }
     </style>
@@ -503,20 +512,25 @@
                 }
             });
 
-            const availableWidth = Math.max(container.clientWidth - paddingX - gameAreaPaddingX, 80);
-            const availableHeight = window.innerHeight - occupiedHeight - gameAreaPaddingY - 20;
+            const widthFromGameArea = Math.max(gameArea.clientWidth - gameAreaPaddingX, 0);
+            const availableWidth = Math.max(widthFromGameArea, container.clientWidth - paddingX - gameAreaPaddingX, 80);
+            const heightFromGameArea = Math.max(gameArea.clientHeight - gameAreaPaddingY, 0);
+            const availableHeightViewport = window.innerHeight - occupiedHeight - gameAreaPaddingY - 20;
+            const availableHeight = Math.max(heightFromGameArea, availableHeightViewport, 120);
             const heightPerRow = availableHeight / ROWS;
             const widthPerCol = availableWidth / COLS;
-            const newBlockSize = Math.max(6, Math.min(30, Math.floor(Math.min(widthPerCol, heightPerRow))));
+            const newBlockSize = Math.max(10, Math.floor(Math.min(widthPerCol, heightPerRow)));
 
             if (Number.isFinite(newBlockSize) && newBlockSize > 0 && newBlockSize !== blockSize) {
                 blockSize = newBlockSize;
             }
 
-            canvas.width = COLS * blockSize;
-            canvas.height = ROWS * blockSize;
-            canvas.style.width = `${COLS * blockSize}px`;
-            canvas.style.height = `${ROWS * blockSize}px`;
+            const canvasWidth = COLS * blockSize;
+            const canvasHeight = ROWS * blockSize;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = `${canvasWidth}px`;
+            canvas.style.height = `${canvasHeight}px`;
 
             drawBoard();
             if (currentPiece) {

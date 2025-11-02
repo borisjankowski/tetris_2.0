@@ -22,22 +22,23 @@
             align-items: center;
             min-height: 100dvh;
             padding: clamp(8px, 2vh, 20px);
-            overflow: hidden;
+            overflow-y: auto;
             touch-action: manipulation;
         }
 
         .container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: clamp(12px, 3vw, 20px);
+            padding: clamp(10px, 2.6vw, 18px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: min(100%, 460px);
-            height: calc(100dvh - clamp(16px, 4vh, 40px));
+            width: min(100%, 440px);
+            max-height: calc(100dvh - clamp(16px, 4vh, 40px));
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            gap: clamp(10px, 2vh, 18px);
+            gap: clamp(8px, 1.8vh, 16px);
             margin: 0 auto;
+            overflow-y: auto;
         }
 
         .header {
@@ -85,7 +86,7 @@
             align-items: center;
             flex: 1 1 auto;
             padding: clamp(6px, 2vh, 16px) 0;
-            min-height: clamp(320px, 58dvh, 680px);
+            min-height: clamp(280px, 54dvh, 640px);
         }
 
         #gameCanvas {
@@ -101,21 +102,21 @@
         .controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            max-width: clamp(240px, 70%, 320px);
-            margin: 0 auto clamp(10px, 3vh, 20px);
+            gap: 6px;
+            max-width: clamp(200px, 60%, 280px);
+            margin: 0 auto clamp(8px, 2.4vh, 16px);
         }
 
         .control-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: clamp(10px, 3.5vw, 16px);
-            border-radius: 12px;
-            font-size: clamp(1em, 4vw, 1.2em);
+            padding: clamp(8px, 2.8vw, 12px);
+            border-radius: 10px;
+            font-size: clamp(0.9em, 3.6vw, 1.05em);
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
             font-weight: bold;
         }
 
@@ -155,21 +156,22 @@
 
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            margin-bottom: clamp(10px, 3vh, 20px);
+            flex-wrap: wrap;
+            margin-bottom: clamp(8px, 2.4vh, 16px);
         }
 
         .action-btn {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border: none;
             color: white;
-            padding: clamp(12px, 3vw, 18px) clamp(22px, 6vw, 32px);
-            border-radius: 12px;
-            font-size: clamp(0.95em, 3.2vw, 1.05em);
+            padding: clamp(10px, 2.6vw, 14px) clamp(18px, 5vw, 26px);
+            border-radius: 10px;
+            font-size: clamp(0.9em, 3vw, 1em);
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+            box-shadow: 0 3px 12px rgba(245, 87, 108, 0.3);
             font-weight: bold;
         }
 
@@ -234,7 +236,7 @@
 
             .container {
                 width: 100%;
-                height: calc(100dvh - clamp(12px, 3vh, 24px));
+                max-height: calc(100dvh - clamp(12px, 3vh, 24px));
             }
 
             h1 {
@@ -250,7 +252,7 @@
             }
 
             .game-area {
-                min-height: clamp(360px, 65dvh, 720px);
+                min-height: clamp(300px, 55dvh, 640px);
             }
 
             .controls {
@@ -260,17 +262,13 @@
             }
 
             .control-btn {
-                padding: clamp(9px, 3vw, 12px);
-                font-size: 0.95em;
-            }
-
-            .action-buttons {
-                flex-wrap: wrap;
+                padding: clamp(7px, 2.6vw, 10px);
+                font-size: 0.9em;
             }
 
             .action-btn {
-                padding: 10px 20px;
-                font-size: 0.95em;
+                padding: 9px 18px;
+                font-size: 0.9em;
             }
         }
     </style>

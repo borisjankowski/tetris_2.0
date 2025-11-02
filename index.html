@@ -31,39 +31,36 @@
             border-radius: 20px;
             padding: clamp(10px, 2.6vw, 18px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: min(100%, 440px);
-            max-height: calc(100dvh - clamp(16px, 4vh, 40px));
+            width: 100%;
+            max-width: 100%;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            gap: clamp(8px, 1.8vh, 16px);
-            margin: 0 auto;
+            gap: 0.6rem;
             overflow-y: auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 15px;
         }
 
         h1 {
             color: #667eea;
-            font-size: 2em;
-            margin-bottom: 5px;
+            font-size: clamp(1.1rem, 3.2vw, 1.4rem);
+            margin-bottom: 0.25rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 4px;
         }
 
         .stat-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px;
+            padding: 6px;
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -76,44 +73,43 @@
         }
 
         .stat-value {
-            font-size: 1.3em;
+            font-size: 0.9rem;
             font-weight: bold;
         }
 
         .game-area {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             flex: 1 1 auto;
-            padding: clamp(6px, 2vh, 16px) 0;
-            min-height: clamp(280px, 54dvh, 640px);
+            min-height: 55vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
 
         #gameCanvas {
-            border: 3px solid #667eea;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            background: #1a1a2e;
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            aspect-ratio: 1 / 2;
+            display: block;
+            background: #1a1a2e;
+            border-radius: 12px;
         }
 
         .controls {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            max-width: clamp(200px, 60%, 280px);
-            margin: 0 auto clamp(8px, 2.4vh, 16px);
+            grid-template-columns: repeat(3, minmax(50px, 1fr));
+            gap: 4px;
+            width: 100%;
+            max-width: none;
+            margin-bottom: 0.4rem;
         }
 
         .control-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: clamp(8px, 2.8vw, 12px);
-            border-radius: 10px;
-            font-size: clamp(0.9em, 3.6vw, 1.05em);
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
@@ -156,19 +152,19 @@
 
         .action-buttons {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: clamp(8px, 2.4vh, 16px);
+            margin-bottom: 0.3rem;
         }
 
         .action-btn {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border: none;
             color: white;
-            padding: clamp(10px, 2.6vw, 14px) clamp(18px, 5vw, 26px);
-            border-radius: 10px;
-            font-size: clamp(0.9em, 3vw, 1em);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 3px 12px rgba(245, 87, 108, 0.3);
@@ -229,46 +225,9 @@
             color: #333;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: clamp(6px, 2vh, 16px);
-            }
-
-            .container {
-                width: 100%;
-                max-height: calc(100dvh - clamp(12px, 3vh, 24px));
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .stat-box {
-                padding: 8px;
-            }
-
-            .stat-value {
-                font-size: 1.1em;
-            }
-
-            .game-area {
-                min-height: clamp(300px, 55dvh, 640px);
-            }
-
+        @media (max-width: 420px) {
             .controls {
-                width: 100%;
-                max-width: none;
-                gap: 6px;
-            }
-
-            .control-btn {
-                padding: clamp(7px, 2.6vw, 10px);
-                font-size: 0.9em;
-            }
-
-            .action-btn {
-                padding: 9px 18px;
-                font-size: 0.9em;
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -330,7 +289,8 @@
         const ctx = canvas.getContext('2d');
         const ROWS = 20;
         const COLS = 10;
-        let blockSize = 30;
+        const MIN_BLOCK_SIZE = 16;
+        let blockSize = MIN_BLOCK_SIZE;
         const LEVEL_SPEEDS = [
             1000, 930, 860, 790, 720,
             650, 580, 510, 440, 370,
@@ -496,30 +456,40 @@
             }
 
             const containerStyles = window.getComputedStyle(container);
-            const paddingX = parseFloat(containerStyles.paddingLeft) + parseFloat(containerStyles.paddingRight);
-            const paddingY = parseFloat(containerStyles.paddingTop) + parseFloat(containerStyles.paddingBottom);
-            const gameAreaStyles = window.getComputedStyle(gameArea);
-            const gameAreaPaddingX = parseFloat(gameAreaStyles.paddingLeft) + parseFloat(gameAreaStyles.paddingRight);
-            const gameAreaPaddingY = parseFloat(gameAreaStyles.paddingTop) + parseFloat(gameAreaStyles.paddingBottom);
+            const paddingTop = parseFloat(containerStyles.paddingTop) || 0;
+            const paddingBottom = parseFloat(containerStyles.paddingBottom) || 0;
+            const paddingLeft = parseFloat(containerStyles.paddingLeft) || 0;
+            const paddingRight = parseFloat(containerStyles.paddingRight) || 0;
+            const rowGap = parseFloat(containerStyles.rowGap || containerStyles.gap || 0);
+            const gapCount = Math.max(container.children.length - 1, 0);
 
-            let occupiedHeight = paddingY;
-            Array.from(container.children).forEach(child => {
-                if (child !== gameArea) {
-                    const styles = window.getComputedStyle(child);
-                    occupiedHeight += child.offsetHeight + parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
-                }
-            });
+            const getOuterHeight = (element) => {
+                if (!element) return 0;
+                const styles = window.getComputedStyle(element);
+                const marginTop = parseFloat(styles.marginTop) || 0;
+                const marginBottom = parseFloat(styles.marginBottom) || 0;
+                return element.offsetHeight + marginTop + marginBottom;
+            };
 
-            const widthFromGameArea = Math.max(gameArea.clientWidth - gameAreaPaddingX, 0);
-            const availableWidth = Math.max(widthFromGameArea, container.clientWidth - paddingX - gameAreaPaddingX, 80);
-            const heightFromGameArea = Math.max(gameArea.clientHeight - gameAreaPaddingY, 0);
-            const availableHeightViewport = window.innerHeight - occupiedHeight - gameAreaPaddingY - 20;
-            const availableHeight = Math.max(heightFromGameArea, availableHeightViewport, 120);
-            const heightPerRow = availableHeight / ROWS;
-            const widthPerCol = availableWidth / COLS;
-            const newBlockSize = Math.max(10, Math.floor(Math.min(widthPerCol, heightPerRow)));
+            const viewportHeight = window.innerHeight;
+            let availableHeight = viewportHeight - paddingTop - paddingBottom - (rowGap * gapCount);
+            availableHeight -= getOuterHeight(container.querySelector('.header'));
+            availableHeight -= getOuterHeight(container.querySelector('.stats'));
+            availableHeight -= getOuterHeight(container.querySelector('.controls'));
+            availableHeight -= getOuterHeight(container.querySelector('.action-buttons'));
 
-            if (Number.isFinite(newBlockSize) && newBlockSize > 0 && newBlockSize !== blockSize) {
+            if (!Number.isFinite(availableHeight)) {
+                availableHeight = ROWS * MIN_BLOCK_SIZE;
+            }
+
+            const maxWidthForCanvas = Math.max(container.clientWidth - paddingLeft - paddingRight, COLS * MIN_BLOCK_SIZE);
+            const maxHeightForCanvas = Math.max(availableHeight, ROWS * MIN_BLOCK_SIZE);
+            const heightPerRow = maxHeightForCanvas / ROWS;
+            const widthPerCol = maxWidthForCanvas / COLS;
+            let newBlockSize = Math.floor(Math.min(heightPerRow, widthPerCol));
+            newBlockSize = Math.max(MIN_BLOCK_SIZE, Number.isFinite(newBlockSize) ? newBlockSize : MIN_BLOCK_SIZE);
+
+            if (newBlockSize !== blockSize) {
                 blockSize = newBlockSize;
             }
 
@@ -717,9 +687,7 @@
 
         document.getElementById('pauseBtn').disabled = true;
 
-        window.addEventListener('resize', () => {
-            window.requestAnimationFrame(resizeGame);
-        });
+        window.addEventListener('resize', resizeGame);
         window.addEventListener('orientationchange', resizeGame);
 
         resizeGame();

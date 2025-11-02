@@ -19,20 +19,24 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 10px 0;
-            overflow-y: auto;
-            touch-action: pan-y;
+            align-items: center;
+            min-height: 100dvh;
+            padding: clamp(8px, 2vh, 20px);
+            overflow: hidden;
+            touch-action: manipulation;
         }
 
         .container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 15px;
+            padding: clamp(12px, 3vw, 20px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 95%;
+            width: min(100%, 460px);
+            height: calc(100dvh - clamp(16px, 4vh, 40px));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: clamp(10px, 2vh, 18px);
             margin: 0 auto;
         }
 
@@ -78,8 +82,10 @@
         .game-area {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            align-items: center;
+            flex: 1 1 auto;
+            padding: 10px 0;
+            min-height: 0;
         }
 
         #gameCanvas {
@@ -87,6 +93,10 @@
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             background: #1a1a2e;
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            aspect-ratio: 1 / 2;
         }
 
         .controls {
@@ -94,7 +104,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             max-width: 300px;
-            margin: 0 auto 15px;
+            margin: 0 auto clamp(10px, 3vh, 20px);
         }
 
         .control-btn {
@@ -148,6 +158,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            margin-bottom: clamp(10px, 3vh, 20px);
         }
 
         .action-btn {
@@ -218,21 +229,39 @@
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: clamp(6px, 2vh, 16px);
+            }
+
+            .container {
+                width: 100%;
+                height: calc(100dvh - clamp(12px, 3vh, 24px));
+            }
+
             h1 {
-                font-size: 2em;
+                font-size: 1.8em;
             }
 
             .stat-box {
-                padding: 10px;
+                padding: 8px;
             }
 
             .stat-value {
-                font-size: 1.2em;
+                font-size: 1.1em;
+            }
+
+            .controls {
+                width: 100%;
+                max-width: none;
             }
 
             .control-btn {
-                padding: 15px;
+                padding: 14px;
                 font-size: 1em;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -294,7 +323,12 @@
         const ctx = canvas.getContext('2d');
         const ROWS = 20;
         const COLS = 10;
-        const BLOCK_SIZE = 30;
+        let blockSize = 30;
+        const LEVEL_SPEEDS = [
+            1000, 930, 860, 790, 720,
+            650, 580, 510, 440, 370,
+            300, 230, 160, 130, 100
+        ];
 
         let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
         let score = 0;
@@ -302,7 +336,7 @@
         let lines = 0;
         let gameRunning = false;
         let gamePaused = false;
-        let dropInterval = 1000;
+        let dropInterval = LEVEL_SPEEDS[0];
         let lastDropTime = 0;
         let currentPiece = null;
         let gameLoop = null;
@@ -310,36 +344,42 @@
         const bgMusic = document.getElementById('bgMusic');
         bgMusic.volume = 0.3;
 
-        let clearSound = null;
+        let clearSoundContext = null;
         function playClearSound() {
             try {
-                if (!clearSound) {
-                    clearSound = new (window.AudioContext || window.webkitAudioContext)();
+                if (!clearSoundContext) {
+                    clearSoundContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                const osc = clearSound.createOscillator();
-                const gain = clearSound.createGain();
-                const osc2 = clearSound.createOscillator();
-                
-                osc.connect(gain);
-                osc2.connect(gain);
-                gain.connect(clearSound.destination);
-                
-                osc.type = 'square';
-                osc2.type = 'sawtooth';
-                
-                osc.frequency.setValueAtTime(300, clearSound.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, clearSound.currentTime + 0.2);
-                
-                osc2.frequency.setValueAtTime(350, clearSound.currentTime);
-                osc2.frequency.exponentialRampToValueAtTime(100, clearSound.currentTime + 0.2);
-                
-                gain.gain.setValueAtTime(0.4, clearSound.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, clearSound.currentTime + 0.25);
-                
-                osc.start(clearSound.currentTime);
-                osc.stop(clearSound.currentTime + 0.25);
-                osc2.start(clearSound.currentTime);
-                osc2.stop(clearSound.currentTime + 0.25);
+                const ctxAudio = clearSoundContext;
+                if (ctxAudio.state === 'suspended') {
+                    ctxAudio.resume();
+                }
+                const duration = 0.25;
+                const bufferSize = Math.floor(ctxAudio.sampleRate * duration);
+                const noiseBuffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const decay = Math.pow(1 - i / bufferSize, 2);
+                    data[i] = (Math.random() * 2 - 1) * decay;
+                }
+
+                const noise = ctxAudio.createBufferSource();
+                noise.buffer = noiseBuffer;
+
+                const filter = ctxAudio.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, ctxAudio.currentTime);
+
+                const gain = ctxAudio.createGain();
+                gain.gain.setValueAtTime(0.5, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + duration);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctxAudio.destination);
+
+                noise.start();
+                noise.stop(ctxAudio.currentTime + duration);
             } catch (e) {
                 console.log('Sound not available');
             }
@@ -381,8 +421,8 @@
                 for (let r = 0; r < this.shape.length; r++) {
                     for (let c = 0; c < this.shape[r].length; c++) {
                         if (this.shape[r][c]) {
-                            ctx.fillRect((this.x + c) * BLOCK_SIZE, (this.y + r) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                            ctx.strokeRect((this.x + c) * BLOCK_SIZE, (this.y + r) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            ctx.fillRect((this.x + c) * blockSize, (this.y + r) * blockSize, blockSize, blockSize);
+                            ctx.strokeRect((this.x + c) * blockSize, (this.y + r) * blockSize, blockSize, blockSize);
                         }
                     }
                 }
@@ -441,6 +481,49 @@
             }
         }
 
+        function resizeGame() {
+            const container = document.querySelector('.container');
+            const gameArea = document.querySelector('.game-area');
+            if (!container || !gameArea) {
+                return;
+            }
+
+            const containerStyles = window.getComputedStyle(container);
+            const paddingX = parseFloat(containerStyles.paddingLeft) + parseFloat(containerStyles.paddingRight);
+            const paddingY = parseFloat(containerStyles.paddingTop) + parseFloat(containerStyles.paddingBottom);
+            const gameAreaStyles = window.getComputedStyle(gameArea);
+            const gameAreaPaddingX = parseFloat(gameAreaStyles.paddingLeft) + parseFloat(gameAreaStyles.paddingRight);
+            const gameAreaPaddingY = parseFloat(gameAreaStyles.paddingTop) + parseFloat(gameAreaStyles.paddingBottom);
+
+            let occupiedHeight = paddingY;
+            Array.from(container.children).forEach(child => {
+                if (child !== gameArea) {
+                    const styles = window.getComputedStyle(child);
+                    occupiedHeight += child.offsetHeight + parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
+                }
+            });
+
+            const availableWidth = Math.max(container.clientWidth - paddingX - gameAreaPaddingX, 80);
+            const availableHeight = window.innerHeight - occupiedHeight - gameAreaPaddingY - 20;
+            const heightPerRow = availableHeight / ROWS;
+            const widthPerCol = availableWidth / COLS;
+            const newBlockSize = Math.max(6, Math.min(30, Math.floor(Math.min(widthPerCol, heightPerRow))));
+
+            if (Number.isFinite(newBlockSize) && newBlockSize > 0 && newBlockSize !== blockSize) {
+                blockSize = newBlockSize;
+            }
+
+            canvas.width = COLS * blockSize;
+            canvas.height = ROWS * blockSize;
+            canvas.style.width = `${COLS * blockSize}px`;
+            canvas.style.height = `${ROWS * blockSize}px`;
+
+            drawBoard();
+            if (currentPiece) {
+                currentPiece.draw();
+            }
+        }
+
         function drawBoard() {
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -449,10 +532,10 @@
                 for (let c = 0; c < COLS; c++) {
                     if (board[r][c]) {
                         ctx.fillStyle = board[r][c];
-                        ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        ctx.fillRect(c * blockSize, r * blockSize, blockSize, blockSize);
                         ctx.strokeStyle = '#000';
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        ctx.strokeRect(c * blockSize, r * blockSize, blockSize, blockSize);
                     }
                 }
             }
@@ -461,14 +544,14 @@
             ctx.lineWidth = 1;
             for (let r = 0; r <= ROWS; r++) {
                 ctx.beginPath();
-                ctx.moveTo(0, r * BLOCK_SIZE);
-                ctx.lineTo(COLS * BLOCK_SIZE, r * BLOCK_SIZE);
+                ctx.moveTo(0, r * blockSize);
+                ctx.lineTo(COLS * blockSize, r * blockSize);
                 ctx.stroke();
             }
             for (let c = 0; c <= COLS; c++) {
                 ctx.beginPath();
-                ctx.moveTo(c * BLOCK_SIZE, 0);
-                ctx.lineTo(c * BLOCK_SIZE, ROWS * BLOCK_SIZE);
+                ctx.moveTo(c * blockSize, 0);
+                ctx.lineTo(c * blockSize, ROWS * blockSize);
                 ctx.stroke();
             }
         }
@@ -487,8 +570,8 @@
                 playClearSound();
                 lines += linesCleared;
                 score += linesCleared * 100 * level;
-                level = Math.min(10, Math.floor(lines / 10) + 1);
-                dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                level = Math.min(15, Math.floor(lines / 10) + 1);
+                dropInterval = LEVEL_SPEEDS[level - 1] || LEVEL_SPEEDS[LEVEL_SPEEDS.length - 1];
                 updateStats();
             }
         }
@@ -544,12 +627,13 @@
             score = 0;
             level = 1;
             lines = 0;
-            dropInterval = 1000;
+            dropInterval = LEVEL_SPEEDS[0];
             gameRunning = true;
             gamePaused = false;
             currentPiece = new Piece();
             lastDropTime = performance.now();
             updateStats();
+            resizeGame();
             
             document.getElementById('startBtn').disabled = true;
             document.getElementById('pauseBtn').disabled = false;
@@ -620,8 +704,13 @@
         });
 
         document.getElementById('pauseBtn').disabled = true;
-        
-        drawBoard();
+
+        window.addEventListener('resize', () => {
+            window.requestAnimationFrame(resizeGame);
+        });
+        window.addEventListener('orientationchange', resizeGame);
+
+        resizeGame();
     </script>
 </body>
 </html>
